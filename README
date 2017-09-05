@@ -1,0 +1,1 @@
+Simple ssl client that can save certificates and certificate chains, as well as fetch an HTTPS resource.
