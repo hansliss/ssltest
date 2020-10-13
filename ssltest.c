@@ -22,7 +22,7 @@ void usage(char *progname)
 {
   fprintf(stderr, "Usage: %s -h <host> [-p <port>] [-c <filename for cert listing>]\n", progname);
   fprintf(stderr, "\t[-P <pem filename for cert dump>] [-C (dump entire certificate chain)]\n");
-  fprintf(stderr, "\t[-u <relative path, default \"/\"] [-K <cookie>]\n");
+  fprintf(stderr, "\t[-u <relative path, default \"/\"] [-K <cookie>] [-H (set TLS hostname)]\n");
 }
 
 typedef struct readlinebuf_s {
@@ -214,8 +214,9 @@ int main(int argc, char *argv[])
   char *cookie="";
   char *l;
   int chunk;
+  int set_tls_hostname=0;
 
-  while ((o=getopt(argc, argv, "h:p:c:CP:u:K:"))!=-1)
+  while ((o=getopt(argc, argv, "h:p:c:CP:u:K:H"))!=-1)
     {
       switch (o)
 	{
@@ -239,6 +240,9 @@ int main(int argc, char *argv[])
 	  break;
 	case 'K':
 	  cookie=optarg;
+	  break;
+	case 'H':
+	  set_tls_hostname=1;
 	  break;
 	default:
 	  usage(argv[0]);
@@ -307,7 +311,12 @@ int main(int argc, char *argv[])
       return -6;
     }
 #endif
-
+  if (set_tls_hostname) {
+    if (!SSL_set_tlsext_host_name(myssl, host)) {
+      fprintf(stderr, "SSL_set_tlsext_host_name() failed\n");
+      return -8;
+    }
+  }
   if ((ret=SSL_connect(myssl))!=1)
     {
       fprintf(stderr,"SSL_connect() returned %d: %s: %s\n", ret, ERR_error_string(ERR_get_error(), NULL), ERR_error_string(SSL_get_error(myssl, ret), NULL));
