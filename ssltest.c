@@ -186,7 +186,6 @@ int main(int argc, char *argv[])
   STACK_OF(GENERAL_NAME) *alt;
   STACK_OF(X509) *cert_chain;
   int n;
-  unsigned char *sn;
   int sl;
   GENERAL_NAME *gn;
   // X509V3_EXT_METHOD *method;
@@ -392,7 +391,7 @@ int main(int argc, char *argv[])
 		  gn=sk_GENERAL_NAME_value(alt, i);
 		  if (gn->type == GEN_DNS)
 		    {
-		      sn=ASN1_STRING_data(gn->d.ia5);
+		        const unsigned char *sn=ASN1_STRING_get0_data(gn->d.ia5);
 		      sl=ASN1_STRING_length(gn->d.ia5);
 		      printf("%d: \"%s\" (%d)\n", i, sn, sl);
 		    }
